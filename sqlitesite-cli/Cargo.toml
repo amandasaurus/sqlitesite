@@ -1,0 +1,12 @@
+[package]
+name = "sqlitesite-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.98"
+clap = { version = "4.5.38", features = ["derive"] }
+indicatif = "0.17.11"
+libsqlitesite = { path = "../libsqlitesite/" }
+walkdir = "2.5.0"
+zstd = "0.13.3"

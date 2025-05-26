@@ -1,0 +1,5 @@
+/target
+*.sqlitesite
+*.db
+*.db-journal
+*zstd-dictionary*
