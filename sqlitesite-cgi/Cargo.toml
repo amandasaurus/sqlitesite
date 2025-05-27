@@ -7,5 +7,5 @@ edition = "2021"
 anyhow = "1.0.98"
 clap = { version = "4.5.38", features = ["derive"] }
 libsqlitesite = { path = "../libsqlitesite/" }
-cgi = { path = "../../rust-cgi/" }
+cgi = "0.8.0"
 urlencoding = "2.1.3"
