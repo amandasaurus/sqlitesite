@@ -23,7 +23,7 @@ Simple, dev tool to serve up files from that sqlitesite.
 
 ## Projects using this
 
-* WaterwayMap River Database
+* [WaterwayMap River Database](https://waterwaymap.org/river/)
 
 ## Copyright
 
