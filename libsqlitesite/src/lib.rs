@@ -79,6 +79,13 @@ impl SqliteSite {
 
         Ok(Self::from_conn(db))
     }
+	#[cfg(test)]
+    pub fn create_in_memory() -> Result<Self> {
+        let mut db = Connection::open_in_memory()?;
+        db.execute_batch(include_str!("schema.sql"))?;
+
+        Ok(Self::from_conn(db))
+    }
 
     pub fn open(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
@@ -302,6 +309,24 @@ impl SqliteSite {
     pub fn start_bulk(&mut self) -> Result<BulkSqliteSiteAdder> {
         BulkSqliteSiteAdder::from_site(self)
     }
+
+    pub fn metadata(&self, name: impl AsRef<str>) -> Result<Option<String>> {
+        let value: Option<String> = self.db.query_row(
+            "SELECT value FROM metadata WHERE name = ?1;",
+            [&name.as_ref()],
+            |row| row.get(0),
+        ).optional()?;
+		Ok(value)
+	}
+    pub fn set_metadata(&self, name: impl AsRef<str>, value: impl AsRef<str>) -> Result<()> {
+		let name: &str = name.as_ref();
+		let value: &str = value.as_ref();
+        self.db.execute(
+            "INSERT INTO metadata (name, value) VALUES (?1, ?2) ON CONFLICT(name) DO UPDATE SET value = excluded.value;",
+            [name, value],
+        )?;
+		Ok(())
+	}
 }
 
 pub struct BulkSqliteSiteAdder<'a> {

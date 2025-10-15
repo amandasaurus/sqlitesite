@@ -14,3 +14,8 @@ CREATE TABLE http_response_headers (
 	id INTEGER PRIMARY KEY,
 	headers_json BLOB NOT NULL UNIQUE
 );
+
+CREATE TABLE metadata (
+	name TEXT PRIMARY KEY,
+	value TEXT NOT NULL
+);
