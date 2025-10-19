@@ -1,3 +1,4 @@
+//! Store websites in a a compressed single file database
 #![allow(warnings)]
 use anyhow::Result;
 use rusqlite::{Connection, OptionalExtension, Transaction};
@@ -9,11 +10,13 @@ use std::path::Path;
 #[cfg(test)]
 mod tests;
 
+/// A single webpage database
 #[derive(Debug)]
 pub struct SqliteSite {
     db: Connection,
 }
 
+/// The type of HTTP response possible for a URL.
 #[derive(PartialEq, Debug)]
 pub enum PageResponse {
     http200(Option<Vec<(String, String)>>, Box<[u8]>),
@@ -31,7 +34,7 @@ impl PageResponse {
     }
 }
 
-/// Canonicalize URLs
+/// Canonicalise a URL
 pub fn c14n_url<'a>(url: impl Into<Cow<'a, str>>) -> Cow<'a, str> {
     let mut url: Cow<'a, str> = url.into();
 
@@ -54,7 +57,7 @@ fn url_can_be_slashhed<'a>(url: impl Into<Cow<'a, str>>) -> bool {
             .map_or(false, |last_part| !last_part.contains(&['.', '?', '#']))
 }
 
-/// Canonicalize URLs, and optionally add a trailing slash if appropriate.
+/// Canonicalise URLs, and optionally add a trailing slash if appropriate.
 /// Useful when adding page
 pub fn c14n_url_w_slash<'a>(url: impl Into<Cow<'a, str>>) -> Cow<'a, str> {
     let mut url: Cow<'a, str> = c14n_url(url);
@@ -70,6 +73,9 @@ impl SqliteSite {
     fn from_conn(db: Connection) -> Self {
         SqliteSite { db }
     }
+
+    /// Create and return a new SqliteSite for this path.
+    /// Error if the page already exists
     pub fn create(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
         anyhow::ensure!(!path.exists(), "Path {} already  exists", path.display());
@@ -79,7 +85,7 @@ impl SqliteSite {
 
         Ok(Self::from_conn(db))
     }
-	#[cfg(test)]
+    #[cfg(test)]
     pub fn create_in_memory() -> Result<Self> {
         let mut db = Connection::open_in_memory()?;
         db.execute_batch(include_str!("schema.sql"))?;
@@ -87,6 +93,8 @@ impl SqliteSite {
         Ok(Self::from_conn(db))
     }
 
+    /// Open an existing database file.
+    /// Errors if it doesn't exist
     pub fn open(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
         anyhow::ensure!(path.exists(), "Path {} doesn't exists", path.display());
@@ -97,6 +105,7 @@ impl SqliteSite {
         Ok(Self::from_conn(db))
     }
 
+    /// Open an existing file, or create it if needed
     pub fn open_or_create(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
         if path.exists() {
@@ -106,12 +115,15 @@ impl SqliteSite {
         }
     }
 
+    /// Number of URLs in this site
     pub fn num_urls(&self) -> Result<usize> {
         Ok(self
             .db
             .query_row("SELECT COUNT(*) FROM urls;", [], |row| row.get(0))?)
     }
 
+    /// Return the ID of the zstd dict with those bytes, creating it if needed.
+    /// If a dict already exists with exactly that binary content, return that's id
     pub fn get_or_create_zstd_dictionary(&self, zstd_dictionary_bytes: &[u8]) -> Result<u32> {
         self.db.execute(
             "INSERT OR IGNORE INTO zstd_dictionaries (bytes) VALUES (?1);",
@@ -126,6 +138,7 @@ impl SqliteSite {
         Ok(zstd_dictionary_id)
     }
 
+    /// Return the ID to use for those HTTP response headers
     pub fn get_or_create_http_response_headers_id(
         &self,
         mut headers: Vec<(String, String)>,
@@ -146,6 +159,7 @@ impl SqliteSite {
         Ok(http_headers_id)
     }
 
+    /// For this URL, first canonicalise it, then get the response for it
     pub fn get_c14n_url(&self, url: &str) -> Result<PageResponse> {
         let new_url = c14n_url(url);
         if new_url != url {
@@ -159,6 +173,7 @@ impl SqliteSite {
         Ok(direct_resp)
     }
 
+    /// Look up exactly this URL in the DB & return the response
     pub fn get_url(&self, url: &str) -> Result<PageResponse> {
         let res: Option<(Option<u32>, Option<u32>, Box<[u8]>)> = self
             .db
@@ -209,6 +224,7 @@ impl SqliteSite {
         Ok(PageResponse::http200(http_response_headers, content))
     }
 
+    /// Canonicalise that url, then add it to the site
     pub fn set_c14n_url<'a>(
         &mut self,
         url: impl Into<Cow<'a, str>>,
@@ -224,6 +240,10 @@ impl SqliteSite {
         )
     }
 
+    /// Set the (optionally compressed) contents of a URL to this.
+    /// The contents are not compressed here, the zstd_dictionary_id will be taken raw.
+    /// The URL is not canonicalised or changed.
+    /// If there is already a page for that URL, it is silently overwritten.
     pub fn set_url<'a>(
         &mut self,
         url: impl Into<Cow<'a, str>>,
@@ -258,6 +278,7 @@ impl SqliteSite {
         Ok(())
     }
 
+    /// Returns a list of all URLs in this p
     pub fn urls(&self, limit: impl Into<Option<usize>>) -> Result<Box<[String]>> {
         let mut res: Vec<String> = Vec::with_capacity(self.num_urls()?);
         let limit = limit
@@ -306,11 +327,13 @@ impl SqliteSite {
         Ok(res.into_boxed_slice())
     }
 
+    /// Start doing a bulk addition of pages
     pub fn start_bulk(&mut self) -> Result<BulkSqliteSiteAdder> {
         BulkSqliteSiteAdder::from_site(self)
     }
 
-	/// Returns a metadata value
+    /// Gets a metadata value.
+    /// Option if this value doesn't exist.
     pub fn metadata(&self, name: impl AsRef<str>) -> Result<Option<String>> {
         let value: Option<String> = self.db.query_row(
             "SELECT value FROM metadata WHERE name = ?1;",
@@ -320,6 +343,7 @@ impl SqliteSite {
 		Ok(value)
 	}
 	/// Sets a metadata value
+    /// Sets a metadata value
     pub fn set_metadata(&self, name: impl AsRef<str>, value: impl AsRef<str>) -> Result<()> {
 		let name: &str = name.as_ref();
 		let value: &str = value.as_ref();
@@ -360,6 +384,7 @@ impl SqliteSite {
 	}
 }
 
+/// Helper struct to add many pages quicker by using prepared queries and transactions
 pub struct BulkSqliteSiteAdder<'a> {
     txn: rusqlite::Transaction<'a>,
 }
