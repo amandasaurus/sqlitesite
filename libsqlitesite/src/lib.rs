@@ -335,53 +335,61 @@ impl SqliteSite {
     /// Gets a metadata value.
     /// Option if this value doesn't exist.
     pub fn metadata(&self, name: impl AsRef<str>) -> Result<Option<String>> {
-        let value: Option<String> = self.db.query_row(
-            "SELECT value FROM metadata WHERE name = ?1;",
-            [&name.as_ref()],
-            |row| row.get(0),
-        ).optional()?;
-		Ok(value)
-	}
-	/// Sets a metadata value
+        let value: Option<String> = self
+            .db
+            .query_row(
+                "SELECT value FROM metadata WHERE name = ?1;",
+                [&name.as_ref()],
+                |row| row.get(0),
+            )
+            .optional()?;
+        Ok(value)
+    }
+    /// Sets a metadata value
     /// Sets a metadata value
     pub fn set_metadata(&self, name: impl AsRef<str>, value: impl AsRef<str>) -> Result<()> {
-		let name: &str = name.as_ref();
-		let value: &str = value.as_ref();
+        let name: &str = name.as_ref();
+        let value: &str = value.as_ref();
         self.db.execute(
             "INSERT INTO metadata (name, value) VALUES (?1, ?2) ON CONFLICT(name) DO UPDATE SET value = excluded.value;",
             [name, value],
         )?;
-		Ok(())
-	}
+        Ok(())
+    }
 
-	pub fn contents_for_404(&self) -> Result<Option<String>> {
-		if self.metadata("send_content_for_404")?.map_or(false, |v| v == "true") {
-			let content = self.metadata("content_for_404")?.ok_or(anyhow::anyhow!("content_for_404 is not set, while send_content_for_404 is set to true"))?;
-			Ok(Some(content))
-		} else {
-			Ok(None)
-		}
-	}
-	pub fn set_contents_for_404(&mut self, content: impl AsRef<str>) -> Result<()> {
-		let content: &str = content.as_ref();
-		self.set_metadata("content_for_404", content)?;
-		self.set_metadata("send_content_for_404", "true")?;
-		Ok(())
-	}
-	pub fn set_content_404_sending(&mut self, enabled: bool) -> Result<()> {
-		if enabled {
-			anyhow::ensure!(self.metadata("content_for_404")?.is_some(), "Cannot enable special 404 handling , if you have not already set the contents for the 404 page");
-		}
+    pub fn contents_for_404(&self) -> Result<Option<String>> {
+        if self
+            .metadata("send_content_for_404")?
+            .map_or(false, |v| v == "true")
+        {
+            let content = self.metadata("content_for_404")?.ok_or(anyhow::anyhow!(
+                "content_for_404 is not set, while send_content_for_404 is set to true"
+            ))?;
+            Ok(Some(content))
+        } else {
+            Ok(None)
+        }
+    }
+    pub fn set_contents_for_404(&mut self, content: impl AsRef<str>) -> Result<()> {
+        let content: &str = content.as_ref();
+        self.set_metadata("content_for_404", content)?;
+        self.set_metadata("send_content_for_404", "true")?;
+        Ok(())
+    }
+    pub fn set_content_404_sending(&mut self, enabled: bool) -> Result<()> {
+        if enabled {
+            anyhow::ensure!(self.metadata("content_for_404")?.is_some(), "Cannot enable special 404 handling , if you have not already set the contents for the 404 page");
+        }
 
-		self.set_metadata("content_for_404", if enabled { "true" } else { "false" })?;
-		Ok(())
-	}
-	pub fn enable_404_content(&mut self) -> Result<()> {
-		self.set_content_404_sending(true)
-	}
-	pub fn disable_404_content(&mut self) -> Result<()> {
-		self.set_content_404_sending(false)
-	}
+        self.set_metadata("content_for_404", if enabled { "true" } else { "false" })?;
+        Ok(())
+    }
+    pub fn enable_404_content(&mut self) -> Result<()> {
+        self.set_content_404_sending(true)
+    }
+    pub fn disable_404_content(&mut self) -> Result<()> {
+        self.set_content_404_sending(false)
+    }
 }
 
 /// Helper struct to add many pages quicker by using prepared queries and transactions
