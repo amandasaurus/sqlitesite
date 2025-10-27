@@ -66,7 +66,7 @@ pub(crate) fn import_dir(
         let mut zstd_dictionary_id_opt = None;
         if let Some(file_ext) = entry.path().extension().and_then(|e| e.to_str()) {
             assert!(zstd_dictionaries.iter().filter(|x| x.0 == file_ext).count() < 2);
-            if let Some((_pattern, ref mut zstd_compressor, zstd_dictionary_id)) = zstd_dictionaries
+            if let Some((_pattern, zstd_compressor, zstd_dictionary_id)) = zstd_dictionaries
                 .iter_mut()
                 .filter(|x| x.0 == file_ext)
                 .take(1)

@@ -113,7 +113,7 @@ fn main() -> Result<()> {
         Commands::SearchHeaders { pattern } => {
             let mut site = SqliteSite::open(&args.db_path)?;
             let result = site.search_headers(&pattern).unwrap();
-            for url in result.into_iter() {
+            for url in result.iter() {
                 println!("{}", url);
             }
         }
@@ -131,7 +131,7 @@ fn main() -> Result<()> {
             println!(
                 "URLs:\n{}",
                 site.urls(20)?
-                    .into_iter()
+                    .iter()
                     .map(|u| format!(
                         " • {} {} B",
                         u,
