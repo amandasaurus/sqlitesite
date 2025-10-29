@@ -378,7 +378,10 @@ impl SqliteSite {
     }
     pub fn set_content_404_sending(&mut self, enabled: bool) -> Result<()> {
         if enabled {
-            anyhow::ensure!(self.metadata("content_for_404")?.is_some(), "Cannot enable special 404 handling , if you have not already set the contents for the 404 page");
+            anyhow::ensure!(
+                self.metadata("content_for_404")?.is_some(),
+                "Cannot enable special 404 handling , if you have not already set the contents for the 404 page"
+            );
         }
 
         self.set_metadata("content_for_404", if enabled { "true" } else { "false" })?;
