@@ -667,7 +667,7 @@ dependencies = [
 
 [[package]]
 name = "libsqlitesite"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "glob",
@@ -1032,7 +1032,7 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
 name = "sqlitesite-cgi"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "cgi",
@@ -1043,7 +1043,7 @@ dependencies = [
 
 [[package]]
 name = "sqlitesite-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "sqlitesite-web"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
