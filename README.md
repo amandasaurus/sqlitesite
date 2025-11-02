@@ -1,7 +1,10 @@
 # sqlitesite - Store static website in a SQLite database
 
-If you have a static website with many tiny HTML files, which are very similar, it can take a lot of space, and the file i/o overhead can make operations time consuming.
-This tool stores all HTML page (& other static assets) in a simple SQLite database. There is a provided CGI programme, and simple http server, to serve from this format
+If you have a static website with many tiny HTML files, which are very similar,
+it can take a lot of space, and the file i/o overhead can make operations time
+consuming. This tool stores all HTML page (& other static assets) in a simple
+SQLite database. There is a provided CGI programme, and simple http server, to
+serve from this format
 
 ## Components
 
@@ -27,6 +30,4 @@ Simple, dev tool to serve up files from that sqlitesite.
 
 ## Copyright
 
-Copyright MIT or Apache-2.0, 2024 Amanda McCann <amanda@technomancy.org>
-
-
+Copyright MIT or Apache-2.0, 2025 Amanda McCann <amanda@technomancy.org>
