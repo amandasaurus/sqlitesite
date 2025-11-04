@@ -10,6 +10,6 @@ description = "CGI programme to serve from a sqlitesite file"
 [dependencies]
 anyhow = "1.0.98"
 clap = { version = "4.5.38", features = ["derive"] }
-libsqlitesite = { path = "../libsqlitesite/" }
+libsqlitesite = "0.2.0"
 cgi = "0.8.0"
 urlencoding = "2.1.3"

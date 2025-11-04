@@ -11,6 +11,6 @@ description = "CLI interfact to a sqlitesite"
 anyhow = "1.0.98"
 clap = { version = "4.5.38", features = ["derive"] }
 indicatif = "0.18.2"
-libsqlitesite = { path = "../libsqlitesite/" }
+libsqlitesite = "0.2.0"
 walkdir = "2.5.0"
 zstd = "0.13.3"

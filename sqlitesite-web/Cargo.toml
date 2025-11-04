@@ -11,4 +11,4 @@ description = "Debug web server to serve from sqlitesite file"
 anyhow = "1.0.98"
 clap = { version = "4.5.38", features = ["derive"] }
 rouille = "3.6.2"
-libsqlitesite = { path = "../libsqlitesite/" }
+libsqlitesite = "0.2.0"
