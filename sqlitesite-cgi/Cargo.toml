@@ -2,6 +2,10 @@
 name = "sqlitesite-cgi"
 version = "0.2.0"
 edition = "2024"
+authors = ["Amanda McCann <amanda@technomancy.org>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/amandasaurus/sqlitesite"
+description = "CGI programme to serve from a sqlitesite file"
 
 [dependencies]
 anyhow = "1.0.98"
