@@ -119,7 +119,8 @@ impl SqliteSite {
     pub fn num_urls(&self) -> Result<usize> {
         Ok(self
             .db
-            .query_one("SELECT COUNT(*) FROM urls;", [], |row| row.get::<_, i64>(0))? as usize)
+            .query_one("SELECT COUNT(*) FROM urls;", [], |row| row.get::<_, i64>(0))?
+            as usize)
     }
 
     /// Return the ID of the zstd dict with those bytes, creating it if needed.
