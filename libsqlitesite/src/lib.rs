@@ -119,7 +119,7 @@ impl SqliteSite {
     pub fn num_urls(&self) -> Result<usize> {
         Ok(self
             .db
-            .query_row("SELECT COUNT(*) FROM urls;", [], |row| row.get(0))?)
+            .query_one("SELECT COUNT(*) FROM urls;", [], |row| row.get::<_, i64>(0))? as usize)
     }
 
     /// Return the ID of the zstd dict with those bytes, creating it if needed.
@@ -415,7 +415,7 @@ impl<'a> BulkSqliteSiteAdder<'a> {
         let mut stmt = self
             .txn
             .prepare_cached("SELECT COUNT(*) FROM urls WHERE url = ?1;")?;
-        let res: u64 = stmt.query_row([url.as_ref()], |row| Ok(row.get(0)?))?;
+        let res: i64 = stmt.query_row([url.as_ref()], |row| Ok(row.get(0)?))?;
 
         Ok(res > 0)
     }
