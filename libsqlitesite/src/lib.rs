@@ -1,6 +1,6 @@
 //! Store websites in a a compressed single file database
 #![allow(warnings)]
-use anyhow::Result;
+use anyhow::{Context, Result};
 use rusqlite::{Connection, OptionalExtension, Transaction};
 use std::borrow::Cow;
 use std::io::Read;
@@ -356,6 +356,18 @@ impl SqliteSite {
             [name, value],
         )?;
         Ok(())
+    }
+    /// Iterates over all metadata options
+    pub fn metadata_list(&self) -> Result<Vec<(String, String)>> {
+        let mut stmt = self
+            .db
+            .prepare("SELECT name, value FROM metadata ORDER BY name")
+            .context("preparing query")?;
+        let mut res = Vec::new();
+        for row in stmt.query_map([], |row| Ok((row.get(0).unwrap(), row.get(1).unwrap())))? {
+            res.push(row?);
+        }
+        Ok(res)
     }
 
     pub fn contents_for_404(&self) -> Result<Option<String>> {
