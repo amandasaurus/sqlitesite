@@ -20,7 +20,13 @@ cgi::cgi_try_main! { |request: cgi::Request| -> Result<cgi::Response> {
     let url_contents = site.get_c14n_url(&desired_url);
 
     match url_contents.unwrap() {
-        PageResponse::http4xx => Ok(cgi::empty_404()),
+        PageResponse::http4xx => {
+			if let Some(page404_contents) = site.contents_for_404().unwrap() {
+				Ok(cgi::string_response(404, page404_contents))
+			} else {
+				Ok(cgi::empty_404())
+			}
+		},
         PageResponse::http3xx(new_url) => {
             Ok(cgi::redirect_permanent(new_url))
         },

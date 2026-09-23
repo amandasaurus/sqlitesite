@@ -36,7 +36,15 @@ fn main() {
             }
         };
         match resp {
-            PageResponse::http4xx => Response::empty_404(),
+            PageResponse::http4xx => {
+                if let Some(page404_contents) = site.contents_for_404().unwrap() {
+                    let mut r = Response::from_data("", page404_contents);
+                    r.status_code = 404;
+                    r
+                } else {
+                    Response::empty_404()
+                }
+            },
             PageResponse::http3xx(new_url) => Response::redirect_301(new_url),
             PageResponse::http200(headers, bytes) => {
                 let mut resp = Response::from_data("", bytes);
