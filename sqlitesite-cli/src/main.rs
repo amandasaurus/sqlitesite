@@ -1,5 +1,5 @@
 #![allow(warnings)]
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use indicatif::{ProgressBar, ProgressStyle};
 use libsqlitesite::{PageResponse, SqliteSite};
@@ -22,14 +22,19 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Create a new DB
     Create {},
-    Ls {},
-    Summary {},
-    Insert {
-        url: String,
-        content: String,
-    },
 
+    /// List all URLs in a DB
+    Ls {},
+
+    /// Print summary of this file
+    Summary {},
+
+    /// Insert file contents for a URL
+    Insert { url: String, content: String },
+
+    /// Show a specific URL
     Get {
         url: String,
 
@@ -38,14 +43,12 @@ enum Commands {
     },
 
     /// Print all URLs which match this SQL pattern.
-    SearchURL {
-        pattern: String,
-    },
+    SearchURL { pattern: String },
 
     /// Print all URLs where the raw JSON-encoded HTTP header matches this string
-    SearchHeaders {
-        pattern: String,
-    },
+    SearchHeaders { pattern: String },
+
+    /// Import all the files in a directory into this
     ImportDir {
         #[arg(long)]
         drop_trailing_index_html: bool,
