@@ -57,6 +57,9 @@ enum Commands {
         zstd_dictionary: Vec<String>,
         dir: PathBuf,
     },
+
+    /// Show all metadata values
+    Metadata {},
 }
 
 fn main() -> Result<()> {
@@ -155,6 +158,14 @@ fn main() -> Result<()> {
                 zstd_dictionary,
                 &dir,
             )?;
+        }
+        Commands::Metadata {} => {
+            let mut site = SqliteSite::open(&args.db_path).context("opening db")?;
+            let metadata = site.metadata_list().context("getting metadata list")?;
+            println!("{} metadata items", metadata.len());
+            for (k, v) in metadata.iter() {
+                println!("{}: {}", k, v);
+            }
         }
     }
 
